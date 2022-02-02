@@ -16,10 +16,11 @@ namespace OneLineNotebook
     public partial class OneLineNotebookForm : Form
     {
         List<NoteModel> notes = new();
-        int noteCount = 0;
-        int firstNote = 0;
-        int lastNote = 0;
-        int page = 0;
+        
+        
+        int offset = 0;
+        int pageSize = 20;
+        int countNotes = 0;
    
         public OneLineNotebookForm()
         {
@@ -31,11 +32,7 @@ namespace OneLineNotebook
 
         private void LoadCount()
         {
-            noteCount = SqliteDatabaseAccess.CountNotes();
-            firstNote = noteCount - notes.Count + (notes.Count * page);
-            lastNote = noteCount - (notes.Count * page);
-            string s = "Showing nr" + firstNote + " to " + lastNote;
-            label1.Text = s;
+            countNotes = SqliteDatabaseAccess.CountNotes();
         }
 
 
@@ -58,6 +55,7 @@ namespace OneLineNotebook
         {
             listBox1.DataSource = null;
             listBox1.DataSource = notes;
+            label1.Text = (offset / 20 + 1).ToString();
         }
 
 
@@ -123,8 +121,10 @@ namespace OneLineNotebook
                 NoteModel n = new() { Note = textBox2.Lines[^1], Date = DateTime.Now.ToString() };
                 notes.Add(n);
                 ShowNotes();
-                SqliteDatabaseAccess.SaveNote(n);
+                Debug.WriteLine("New ID: " + n.Id);
+                n.Id = SqliteDatabaseAccess.SaveNote(n);
                 textBox2.Text = "";
+                Debug.WriteLine("New ID: " + n.Id);
             }
         }
 
@@ -150,22 +150,27 @@ namespace OneLineNotebook
 
         private void Page_Up_Click(object sender, EventArgs e)
         {
+            offset += 20;
+            if (offset > countNotes) offset -= 20;   
             notes.Clear();
-            notes = SqliteDatabaseAccess.LoadTheseNotes(10,100);
+            notes = SqliteDatabaseAccess.LoadTheseNotes(pageSize,offset);
             foreach(NoteModel note in notes)
             {
                 Debug.WriteLine("Note:" + note);
             }
             Debug.WriteLine("Empty?"  + notes.Count);
             ShowNotes();
-            //page++;
+            label1.Text = (offset/20 + 1).ToString();
         }
 
         private void Page_Down_Click(object sender, EventArgs e)
         {
+            offset -= 20;
+            if (offset < 0) offset = 0;
             notes.Clear();
-            notes = SqliteDatabaseAccess.LoadTheseNotes(5, 0);
+            notes = SqliteDatabaseAccess.LoadTheseNotes(pageSize, offset);
             ShowNotes();
+            label1.Text = (offset/20 + 1).ToString();
         }
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)

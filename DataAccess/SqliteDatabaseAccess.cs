@@ -53,10 +53,12 @@ namespace OneLineNotebook.DataAccess
             };
         }
 
-        public static void SaveNote(NoteModel note)
+        public static int SaveNote(NoteModel note)
         {
+            
             using IDbConnection conn = new SqliteConnection(LoadConnectionString());
-            conn.Execute("insert into NotesTable (Note, SearchWord, Date) values (@Note, @SearchWord, @Date)", note);
+            var result = conn.Execute("insert into NotesTable (Note, SearchWord, Date) values (@Note, @SearchWord, @Date); select last_insert_row();", note);
+            return result;
         }
 
         private static string LoadConnectionString(string id = "Default")

@@ -17,5 +17,14 @@ namespace OneLineNotebook.Models
             } 
         }
         public string Date { get; set; }
+
+        /// <summary>
+        /// Overriding ToString, so the Note is shown in the Listbox
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return Note;
+        }
     }
 }

@@ -57,7 +57,7 @@ namespace OneLineNotebook.DataAccess
         {
             
             using IDbConnection conn = new SqliteConnection(LoadConnectionString());
-            var result = conn.Execute("insert into NotesTable (Note, SearchWord, Date) values (@Note, @SearchWord, @Date); select last_insert_row();", note);
+            var result = conn.Execute("insert into NotesTable (Note, SearchWord, Date) values (@Note, @SearchWord, @Date); select last_insert_rowid();", note);
             return result;
         }
 
@@ -70,6 +70,21 @@ namespace OneLineNotebook.DataAccess
         {
             using IDbConnection conn = new SqliteConnection(LoadConnectionString());
             conn.Execute("delete from NotesTable where Id=@Id", new { Id = id });
+        }
+
+        internal static List<NoteModel> Search(string text)
+        {
+            using (IDbConnection conn = new SqliteConnection(LoadConnectionString()))
+            {
+                SqliteCommand com = (SqliteCommand)conn.CreateCommand();
+                string t = String.Format("select * from NotesTable where SearchWord = @sword");
+                DynamicParameters dp = new();
+                dp.Add("@sword", text);
+                var output = conn.Query<NoteModel>(t, dp).ToList();
+                output.Reverse();
+                
+                return output;
+            };
         }
     }
 }

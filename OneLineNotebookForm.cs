@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,15 +17,15 @@ namespace OneLineNotebook
     public partial class OneLineNotebookForm : Form
     {
         List<NoteModel> notes = new();
-        
-        
+
+
         int offset = 0;
-        int pageSize = 20;
+        readonly int pageSize = 20;
         int countNotes = 0;
-   
+
         public OneLineNotebookForm()
         {
-            InitializeComponent(); 
+            InitializeComponent();
             ActiveControl = textBox2;
             LoadNotes();
             LoadCount();
@@ -73,37 +74,21 @@ namespace OneLineNotebook
             // If you do, app opens in top right corner of second screen,
             // else it open in top right corner.
             // Because I want my OneLineNotebook out of the way :P
-            if(Screen.AllScreens.Length > 1)
+            if (Screen.AllScreens.Length > 1)
             {
                 this.Location = new Point(Screen.AllScreens[1].WorkingArea.Right - this.Width, Screen.AllScreens[1].WorkingArea.Top);
             }
             else
             {
                 this.Location = new Point(Screen.FromPoint(this.Location).WorkingArea.Right - this.Width, 0);
-            } 
+            }
         }
 
-
-        private void loadToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Todo Load", "Load notes");
-           
-        }
-
-        /// <summary>
-        /// On clicking Exit, close app
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
 
         private void ListBox1_Click(object sender, EventArgs e)
         {
             if (listBox1.SelectedItem == null) return;
-            textBox2.Text = listBox1.SelectedItem.ToString();
+            textBox2.Text = listBox1.SelectedItem.ToString() + "\t" + notes[listBox1.SelectedIndex].Date;
             ActiveControl = textBox2;
         }
 
@@ -151,16 +136,16 @@ namespace OneLineNotebook
         private void Page_Up_Click(object sender, EventArgs e)
         {
             offset += 20;
-            if (offset > countNotes) offset -= 20;   
+            if (offset > countNotes) offset -= 20;
             notes.Clear();
-            notes = SqliteDatabaseAccess.LoadTheseNotes(pageSize,offset);
-            foreach(NoteModel note in notes)
+            notes = SqliteDatabaseAccess.LoadTheseNotes(pageSize, offset);
+            foreach (NoteModel note in notes)
             {
                 Debug.WriteLine("Note:" + note);
             }
-            Debug.WriteLine("Empty?"  + notes.Count);
+            Debug.WriteLine("Empty?" + notes.Count);
             ShowNotes();
-            label1.Text = (offset/20 + 1).ToString();
+            label1.Text = (offset / 20 + 1).ToString();
         }
 
         private void Page_Down_Click(object sender, EventArgs e)
@@ -170,17 +155,52 @@ namespace OneLineNotebook
             notes.Clear();
             notes = SqliteDatabaseAccess.LoadTheseNotes(pageSize, offset);
             ShowNotes();
-            label1.Text = (offset/20 + 1).ToString();
+            label1.Text = (offset / 20 + 1).ToString();
         }
 
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+
+
+        private void Textbox1_KeyPress(object sender, KeyPressEventArgs e)
         {
 
+            if (e.KeyChar == (char)13)
+            {
+                Debug.WriteLine(".!.");
+                Debug.WriteLine("." + textBox1.Text + ".");
+                if (System.Text.RegularExpressions.Regex.IsMatch(textBox1.Text, @"\w") == false) return;
+                textBox1.Text = Regex.Replace(textBox1.Text, @"\t|\n|\r", "");
+                notes = SqliteDatabaseAccess.Search(textBox1.Text);
+                Debug.WriteLine(notes.Count);
+                textBox1.Text = "";
+                ShowNotes();
+            }
         }
 
-        private void LoadToolStripMenuItem_Click(object sender, EventArgs e)
+        private void HelpToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            const string message = "Type your one line note in the bottom textfield.  Enter saves and clears the message.  \nThe 20 last notes are shown on " +
+                "screen.  Use page up/down to see other notes.  \nSearch for notes by the first word in the note, so use keywords for the first word in your notes!" +
+                "\nClick on a note and click delete to remove notes from the book. \nEnjoy! \nMade by Lars Holen.";
+            const string caption = "Help";
+            MessageBox.Show(message, caption, MessageBoxButtons.OK);
 
         }
+
+        private void Button_reload_Click(object sender, EventArgs e)
+        {
+            ActiveControl = textBox2;
+            offset = 0;
+            countNotes = 0;
+            LoadNotes();
+            LoadCount();
+            ShowNotes();
+        }
+
+        private void TextBox1_Enter(object sender, EventArgs e)
+        {
+            Debug.WriteLine("fire");
+            textBox1.Text = "";
+        }
+
     }
 }

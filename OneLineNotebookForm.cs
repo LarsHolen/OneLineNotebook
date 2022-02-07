@@ -2,14 +2,9 @@
 using OneLineNotebook.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OneLineNotebook
@@ -60,8 +55,6 @@ namespace OneLineNotebook
         }
 
 
-        // textBox.Font = new Font(textBox.Font.FontFamily, 16);
-
         /// <summary>
         /// Onload code.  
         /// 1. Positioning the app on screen
@@ -85,6 +78,11 @@ namespace OneLineNotebook
         }
 
 
+        /// <summary>
+        /// Selecting a note, show note text in the input field + date.  One can delete the selected one.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ListBox1_Click(object sender, EventArgs e)
         {
             if (listBox1.SelectedItem == null) return;
@@ -132,7 +130,11 @@ namespace OneLineNotebook
             }
             ActiveControl = textBox2;
         }
-
+        /// <summary>
+        /// Clicking up btn load new notes from database, pagesize and offset 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Page_Up_Click(object sender, EventArgs e)
         {
             offset += 20;
@@ -147,7 +149,11 @@ namespace OneLineNotebook
             ShowNotes();
             label1.Text = (offset / 20 + 1).ToString();
         }
-
+        /// <summary>
+        /// Clicking down load new notes from database
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Page_Down_Click(object sender, EventArgs e)
         {
             offset -= 20;
@@ -159,23 +165,30 @@ namespace OneLineNotebook
         }
 
 
-
+        /// <summary>
+        /// On keypresses in the search box.  When enter is pressed, check if any letter/numbers are in the text
+        /// if so, search and load the notes from DB that have the searchword. Empty the textbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Textbox1_KeyPress(object sender, KeyPressEventArgs e)
         {
 
             if (e.KeyChar == (char)13)
-            {
-                Debug.WriteLine(".!.");
-                Debug.WriteLine("." + textBox1.Text + ".");
+            { 
                 if (System.Text.RegularExpressions.Regex.IsMatch(textBox1.Text, @"\w") == false) return;
                 textBox1.Text = Regex.Replace(textBox1.Text, @"\t|\n|\r", "");
                 notes = SqliteDatabaseAccess.Search(textBox1.Text);
-                Debug.WriteLine(notes.Count);
                 textBox1.Text = "";
                 ShowNotes();
             }
         }
 
+        /// <summary>
+        /// When help is clicked, show a messagebox with some information
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void HelpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             const string message = "Type your one line note in the bottom textfield.  Enter saves and clears the message.  \nThe 20 last notes are shown on " +
@@ -186,6 +199,11 @@ namespace OneLineNotebook
 
         }
 
+        /// <summary>
+        /// This button reload the 20 last notes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_reload_Click(object sender, EventArgs e)
         {
             ActiveControl = textBox2;
@@ -195,12 +213,5 @@ namespace OneLineNotebook
             LoadCount();
             ShowNotes();
         }
-
-        private void TextBox1_Enter(object sender, EventArgs e)
-        {
-            Debug.WriteLine("fire");
-            textBox1.Text = "";
-        }
-
     }
 }

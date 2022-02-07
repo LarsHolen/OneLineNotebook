@@ -182,7 +182,6 @@ namespace OneLineNotebook
             this.textBox1.Size = new System.Drawing.Size(94, 23);
             this.textBox1.TabIndex = 8;
             this.textBox1.Text = "Search(word)";
-            this.textBox1.Enter += new System.EventHandler(this.TextBox1_Enter);
             this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Textbox1_KeyPress);
             // 
             // button_reload

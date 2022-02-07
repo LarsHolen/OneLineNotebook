@@ -15,6 +15,11 @@ namespace OneLineNotebook.DataAccess
 {
     public class SqliteDatabaseAccess
     {
+
+        /// <summary>
+        /// Loads the 20 first Notes
+        /// </summary>
+        /// <returns></returns>
         public static List<NoteModel> LoadNotes()
         {
             using (IDbConnection conn = new SqliteConnection(LoadConnectionString()))
@@ -25,6 +30,12 @@ namespace OneLineNotebook.DataAccess
             };
         }
 
+        /// <summary>
+        /// Loads notes with pagesize and offset
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="off"></param>
+        /// <returns></returns>
         public static List<NoteModel> LoadTheseNotes(int num, int off)
         {
             using (IDbConnection conn = new SqliteConnection(LoadConnectionString()))
@@ -44,6 +55,10 @@ namespace OneLineNotebook.DataAccess
 
         }
 
+        /// <summary>
+        /// Count the total number of notes in DB
+        /// </summary>
+        /// <returns></returns>
         public static int CountNotes()
         {
             using (IDbConnection conn = new SqliteConnection(LoadConnectionString()))
@@ -53,6 +68,11 @@ namespace OneLineNotebook.DataAccess
             };
         }
 
+        /// <summary>
+        /// Save a new note to the DB
+        /// </summary>
+        /// <param name="note"></param>
+        /// <returns></returns>
         public static int SaveNote(NoteModel note)
         {
             
@@ -61,17 +81,32 @@ namespace OneLineNotebook.DataAccess
             return result;
         }
 
+        /// <summary>
+        /// Load the connection string from App.config
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private static string LoadConnectionString(string id = "Default")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }
 
+        /// <summary>
+        /// Delete note with ID.
+        /// </summary>
+        /// <param name="id"></param>
         internal static void DeleteNote(int id)
         {
             using IDbConnection conn = new SqliteConnection(LoadConnectionString());
             conn.Execute("delete from NotesTable where Id=@Id", new { Id = id });
         }
 
+
+        /// <summary>
+        /// Search the Searchword col for text 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns> return a list of Notes with the searchword</returns>
         internal static List<NoteModel> Search(string text)
         {
             using (IDbConnection conn = new SqliteConnection(LoadConnectionString()))
